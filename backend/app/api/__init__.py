@@ -7,3 +7,5 @@ from .sheets import router as sheets
 from .cleaning import router as cleaning
 from .recommendations import router as recommendations
 from .sync import router as sync
+from .dashboard import router as dashboard
+from .settings import router as settings

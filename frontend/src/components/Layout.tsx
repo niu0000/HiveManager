@@ -2,13 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, Upload, MapPin, AlertTriangle, Settings, LogOut, 
-  Sun, Cloud, Menu, X 
+  Sun, Menu, X, Sheet 
 } from 'lucide-react';
-import { formatTime } from '../lib/utils';
+
+const formatTime = () => {
+  const now = new Date();
+  return now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+};
 
 const menuItems = [
   { icon: Home, label: 'ホーム', path: '/' },
   { icon: Upload, label: '自動アサインシステム', path: '/auto-assign' },
+  { icon: Sheet, label: 'スプレッドシート設定', path: '/sheet-settings' },
   { icon: MapPin, label: '京都おすすめ', path: '/recommendations' },
   { icon: AlertTriangle, label: 'アラート', path: '/alerts' },
   { icon: Settings, label: '設定', path: '/settings' },

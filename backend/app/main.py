@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, init_db
-from app.api import auth, rooms, reservations, assignments, sheets, cleaning, recommendations, sync
+from app.api import auth, rooms, reservations, assignments, sheets, cleaning, recommendations, sync, dashboard, settings
 from app.models.base import Base
 
 # DB テーブル作成
@@ -27,6 +27,8 @@ app.include_router(sheets, prefix="/api/sheets", tags=["Google Sheets"])
 app.include_router(cleaning, prefix="/api/cleaning", tags=["Cleaning"])
 app.include_router(recommendations, prefix="/api/recommendations", tags=["Recommendations"])
 app.include_router(sync, prefix="/api/sync", tags=["Sync"])
+app.include_router(dashboard, prefix="/api/dashboard", tags=["Dashboard"])
+app.include_router(settings, prefix="/api/settings", tags=["Settings"])
 
 @app.get("/")
 def read_root():
