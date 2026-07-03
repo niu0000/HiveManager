@@ -122,3 +122,11 @@ class Setting(Base):
     key = Column(String, unique=True, index=True, nullable=False)
     value = Column(Text, nullable=False)
     description = Column(String, nullable=True)
+
+class SheetSetting(Base):
+    __tablename__ = "sheet_settings"
+    id = Column(Integer, primary_key=True, index=True)
+    spreadsheet_id = Column(String, nullable=False)
+    sheet_name = Column(String, default="Sheet1")
+    mappings = Column(JSON, default=[])  # [{spreadsheetColumn: "", systemField: ""}]
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

@@ -1,17 +1,17 @@
-```gitignore
+```
 # Dependencies
 node_modules/
 
-# Build outputs
-dist/
-build/
-coverage/
-htmlcov/
+# Database
+*.db
 
-# Environment variables
-.env
-.env.local
-.env.*
+# Environment
+.env*
+!.env.example
+
+# Editors
+.vscode/
+.idea/
 
 # Python
 __pycache__/
@@ -24,21 +24,19 @@ venv/
 .venv/
 .ENV
 .python-version
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
 .coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
+htmlcov/
+coverage/
+
+# Logs
 *.log
-*.pot
-*.pyc
-*.pyo
-*.pyd
-.MF
-.TemporaryItems
-.trash
+
+# OS
+.DS_Store
+Thumbs.db
 ```

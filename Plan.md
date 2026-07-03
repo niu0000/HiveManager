@@ -1,51 +1,65 @@
-# 【コンテキスト保持用】宿泊管理システム（Dormitory Manager）システム開発マスター仕様書 v2.7
+# 【コンテキスト保持用】宿泊管理システム（Dormitory Manager）システム開発マスター仕様書 v2.8
 
 ## 1. プログラム全体原則（最重要）
 - 【単一責任・細分化の徹底】一つのファイルや関数にロジックを詰め込まない。修正・テストを容易にするため、サービス・API・バリデーションは機能単位で極小のモジュール（ファイル）に完全細分化する。
-- 【ハードコードの完全排除】列位置、ベッド番号範囲、ステータスの背景色など、運用の変化に伴う設定値はすべてDB（UI経由で変更可能）から動的に引き当てる。
+- 【ハードコードの完全排除】列位置、ベッド番号範囲、ステータスの背景色など、運用の変化に伴う設定値はすべて DB（UI 経由で変更可能）から動的に引き当てる。
 
 ---
 
 ## 2. アーキテクチャ & 技術スタック
-- フロントエンド: React 18+, Vite, Tailwind CSS (レスポンシブ対応)
-- バックエンド: FastAPI (Python 3.10+)
-- データベース: SQLite (開発用) / PostgreSQL (本番用) + SQLAlchemy ORM
-- 認証方式: JWT (JSON Web Tokens) による Role-based アクセス制御 (admin / staff)
-- 外部連携: Google Sheets API v4 (セルの値・effectiveFormat.backgroundColor の双方向同期)
-- セキュリティ: bcrypt (パスワードハッシュ化), CORS制限, Rate Limiting (ログイン試行制限)
+- フロントエンド：React 18+, Vite, Tailwind CSS (レスポンシブ対応)
+- バックエンド：FastAPI (Python 3.10+)
+- データベース：SQLite (開発用) / PostgreSQL (本番用) + SQLAlchemy ORM
+- 認証方式：JWT (JSON Web Tokens) による Role-based アクセス制御 (admin / staff)
+- 外部連携：Google Sheets API v4 (セルの値・effectiveFormat.backgroundColor の双方向同期)
+- セキュリティ：bcrypt (パスワードハッシュ化), CORS 制限，Rate Limiting (ログイン試行制限)
 
 ---
 
-## 3. ディレクトリ構造（細分化設計）
-プログラムの巨大化を防ぐため、以下の構成を厳守する。
+## 3. ディレクトリ構造（現在の実装優先）
+
+**現状のディレクトリ構造を維持し、既存のコードを優先して開発を進める。**
 
 backend/
 ├── app/
 │   ├── main.py                  # エントリーポイント・ミドルウェア設定
-│   ├── core/                    # 共通基盤（config.py, security.py, database.py）
-│   ├── models/                  # DBテーブル定義（SQLAlchemy）
-│   │   ├── user.py              # users
-│   │   ├── setting.py           # system_settings, sheet_mappings
-│   │   ├── rules.py             # assignment_rules (ベッド範囲・性別制限)
-│   │   ├── status.py            # color_statuses (背景色とステータスマップ)
-│   │   ├── reservation.py       # reservations, beds
-│   │   └── recommendation.py    # recommendations
-│   ├── schemas/                 # Pydanticバリデーション（auth.py, setting.py, etc.）
+│   ├── config.py                # 環境設定（DB URL、JWT シークレット等）
+│   ├── database.py              # DB セッション管理
+│   ├── models/                  # DB テーブル定義（SQLAlchemy）
+│   │   ├── __init__.py
+│   │   └── base.py              # 全モデル定義（rooms, beds, reservations, assignments, cleaning_records, recommendations, settings）
+│   ├── schemas/                 # Pydantic バリデーション
+│   │   ├── __init__.py
+│   │   ├── auth.py              # 認証関連スキーマ
+│   │   ├── room.py              # 部屋・ベッド関連
+│   │   ├── reservation.py       # 予約関連
+│   │   ├── assignment.py        # アサイン関連
+│   │   ├── cleaning.py          # 清掃関連
+│   │   ├── recommendation.py    # おすすめ情報関連
+│   │   ├── setting.py           # 設定関連
+│   │   └── sync.py              # 同期関連
 │   ├── api/                     # ルーティング（エンドポイント）
-│   │   ├── deps.py              # 共通依存（DBセッション、JWT認証・権限ガード）
-│   │   └── v1/
-│   │       ├── auth.py          # ログイン、アカウント管理
-│   │       ├── settings.py      # マッピング、システム・色設定
-│   │       ├── reservations.py  # タイムライン、手動編集、清掃
-│   │       ├── upload.py        # ねっぱんCSVアップロード受付
-│   │       └── recommendations.py # おすすめ場所管理・公開用API
-│   └── services/                # ビジネスロジック（完全機能分離）
-│       ├── auth_service.py      # ユーザー認証関連
-│       ├── sheet_service.py     # Google Sheets API 通信（値・背景色の取得/書き込み）
-│       ├── color_resolver.py    # セル背景色のHEX変換、ステータス自動解決・表記揺れ吸収
-│       ├── csv_parser.py        # ねっぱんCSVのパース・クレンジング（敬称削除等）
-│       ├── assign_engine.py     # 自動アサインアルゴリズム（男女別・連泊移動最小化・For2対応）
-│       └── sync_service.py      # マッピングに基づくシートとDBの同期コントロール
+│   │   ├── __init__.py
+│   │   ├── auth.py              # ログイン、アカウント管理
+│   │   ├── rooms.py             # 部屋・ベッド管理
+│   │   ├── reservations.py      # 予約管理
+│   │   ├── assignments.py       # アサイン操作
+│   │   ├── cleaning.py          # 清掃ステータス管理
+│   │   ├── recommendations.py   # おすすめ場所管理
+│   │   ├── sheets.py            # Google スプレッドシート連携テスト
+│   │   └── sync.py              # 同期処理
+│   ├── services/                # ビジネスロジック
+│   │   ├── __init__.py
+│   │   ├── google_sheets_service.py  # Google Sheets API 通信
+│   │   ├── settings_service.py       # 設定管理（DB から Sheet ID 等取得）
+│   │   ├── assignment_service.py     # アサインロジック
+│   │   ├── cleaning_service.py       # 清掃管理
+│   │   ├── recommendation_service.py # おすすめ情報管理
+│   │   ├── csv_parser.py             # CSV パース
+│   │   └── sync_service.py           # 同期コントロール
+│   └── utils/                   # 共通ユーティリティ
+│       ├── __init__.py
+│       └── color_resolver.py    # 背景色→ステータス変換
 ├── requirements.txt
 └── .env
 
@@ -53,70 +67,81 @@ backend/
 
 ## 4. データベース設計（主要テーブル定義）
 
-### 4.1 sheet_mappings (列マッピング)
-- `field_type` (String: bed_number, guest_name, check_in, check_out, status 等)
-- `column_letter` (String: 'B', 'D' 等)
-- `header_row` / `data_start_row` (Integer)
+### 4.1 rooms / beds
+- `rooms`: 部屋マスタ（name, room_type, attributes）
+- `beds`: ベッドマスタ（room_id, bed_number, position）
 
-### 4.2 assignment_rules (ベッド範囲・属性ルール)
-- `room_type_code` (String: ねっぱん識別コード)
-- `gender_restriction` (String: male / female / mixed)
-- `bed_number_min` (Integer: 1XX・2XXの最小値設定)
-- `bed_number_max` (Integer: 1XX・2XXの最大値設定)
+### 4.2 reservations（予約・アサインデータ）
+- ねっぱん CSV から取り込んだ予約情報全体
+- `neppan_reservation_id` は現時点では未実装（必要に応じて追加）
 
-### 4.3 color_statuses (背景色とステータスマップ)
-- `hex_color` (String: '#FFEB3B' 等)
-- `status_key` (String: checking_in, staying, checked_out, maintenance, furiako, noshow)
-- `status_name_ja` (String: 「チェックイン待ち」「滞在中」「停止中」「フリアコ」「ノーショー」等)
-- `is_allocatable` (Boolean: 自動アサイン時に「空室」として利用可能か)
+### 4.3 assignments（ベッド割り当て）
+- `reservation_id`, `bed_id`, `check_in_date`, `check_out_date`, `status`
 
-### 4.4 reservations (予約・アサインデータ)
-- `neppan_reservation_id` (String: ねっぱん予約番号)
-- `is_locked` (Boolean: 手動アサイン後の自動移動禁止フラグ)
-- `cleaning_status` (String: 未清掃 / 清掃中 / 完了)
+### 4.4 cleaning_records（清掃記録）
+- `bed_id`, `status`, `staff_name`, `started_at`, `completed_at`, `notes`
+
+### 4.5 recommendations（おすすめ情報）
+- 多言語対応（name_ja/en/zh/ko, description_ja/en/zh/ko, lat, lng, hours, budget）
+
+### 4.6 settings（システム設定）
+- `key`, `value`, `description`
+- Google Sheet ID、カラムマッピング等を保存
 
 ---
 
 ## 5. 核となる機能のロジック仕様
 
-### 5.1 背景色判定 & ステータス解決 (`color_resolver.py`)
-- Google Sheets APIから得たRGB（0.0-1.0）をHEXコードに変換。
-- **【表記揺れ対策】** 人間の手動操作による微妙な色の違い（類似色）を許容するため、カラーディスタンス（RGB距離）計算、または類似色グループ判定を行い、最も近い `color_statuses` に自動翻訳する。
+### 5.1 Google スプレッドシート連携 (`google_sheets_service.py`)
+- Service Account 認証により Sheets API に接続
+- データ取得（get_sheet_data）、更新（update_sheet_data）、背景色取得（get_background_colors）
+- 背景色は RGB(0-1) → 整数 (0-255) 変換まで実装済み
 
-### 5.2 ねっぱんCSVパース (`csv_parser.py`)
-- アップロードされたCSVから「予約番号」「代表者氏名」「宿泊日程」「人数（男女内訳）」「部屋タイプ・プラン」を抽出。
-- **【氏名クレンジング】** 海外OTA等の「SMITH/JOHN MR」といった敬称（MR/MS）を自動除去し、スプレッドシート書き戻し用に指定文字数（例: 12文字）超は三点リーダー処理する関数を噛ませる。
+### 5.2 設定管理 (`settings_service.py`)
+- DB の `settings` テーブルからキー・バリュー形式で設定を取得・保存
+- キャッシュ機構付き（初回 DB 参照後はメモリキャッシュ）
 
-### 5.3 自動アサインエンジン (`assign_engine.py`)
-- **性別・ベッド範囲判定:** CSVの部屋タイプから性別を判定し、`assignment_rules` に基づくベッド番号（1XX＝男性、2XX＝女性）の範囲内でのみ空室を探索。
-- **連泊移動（Room Change）の最小化:** ゲストにシーツ移動を強いないよう、「滞在全期間を通して移動なしで固定できるベッド」を最優先でスコアリング探索。不可能な場合のみ最小回数で分割。
-- **複数ベッドアサイン（For2対応）:** 1予約で複数ベッドが必要な場合、同一部屋内またはベッド番号が連続する空きベッドをセットで最優先アサイン。
-- **状態ガード:** `color_statuses.is_allocatable` が `False` の期間（滞在中・停止中など）、および `is_locked=True` の予約があるベッドは、アサイン対象から完全に除外する。
+### 5.3 自動アサインエンジン (`assignment_service.py`)
+- CSV パース結果とベッドマスタを元に空きベッドを探索
+- 性別・ベッド範囲ルール是基于 DB 設定（今後拡張）
 
-### 5.4 Googleスプレッドシートへの自動書き戻し
-- 自動アサイン成功時、DBの更新に連動して `sheet_service.py` がスプレッドシート側のマッピングされた列へ宿泊者名・ステータスを自動書き込みし、リアルタイムで同期する。
+### 5.4 CSV パース (`csv_parser.py`)
+- ねっぱん CSV の各列を Reservation モデルにマッピング
+- 日付変換、数値変換、文字列クレンジングを実行
 
-### 5.5 ゲスト向け周辺おすすめ場所（デジタルコンシェルジュ）
-- 日英多言語データ対応の `recommendations` テーブル。
-- 管理画面から、認証不要のゲスト専用公開ページURLを含む「案内用QRコード」を自動生成・印刷可能。
-- ゲスト画面ではワンタップでネイティブ Google Maps アプリが起動し、ルート案内を開始。
-
-### 5.6 連動型ベッド清掃・メイク管理
-- チェックアウト日を迎えたベッドを自動で「要清掃」に切り替え。スタッフ専用モバイルUIから「清掃中」「完了」を1タップ更新。完了時はスプレッドシート側にも自動で実績テキストを書き戻す。
+### 5.5 背景色判定 (`utils/color_resolver.py`)
+- シートから取得した RGB をもとにステータスを判定（今後 color_statuses テーブルと連携予定）
 
 ---
 
 ## 6. 実務上の例外・運用リスク対応（落とし穴と対策）
-- **変更・キャンセル処理:** CSV内に既存の予約番号がある場合、キャンセルの場合は即時ベッド解放。変更の場合は「現在アサイン中のベッド」をベースに期間伸縮を試み、手動調整の崩壊を防ぐ。
+- **変更・キャンセル処理:** CSV 内に既存の予約番号がある場合、キャンセルの場合は即時ベッド解放。変更の場合は「現在アサイン中のベッド」をベースに期間伸縮を試み、手動調整の崩壊を防ぐ。
 - **オーバーブック（溢れ）アラート:** 突発的な故障や設定ミスでベッドが不足した場合、エラー落ちさせず「未アサイン（要手動調整リスト）」として管理画面最上部にポップアップ警告する。
-- **ベッド移動指示UI:** 連泊中にどうしてもベッド移動が発生するゲストをタイムラインに矢印表示し、当日のフロント・清掃タスクに自動リスト化して共有漏れを防ぐ。
+- **ベッド移動指示 UI:** 連泊中にどうしてもベッド移動が発生するゲストをタイムラインに矢印表示し、当日のフロント・清掃タスクに自動リスト化して共有漏れを防ぐ。
 
 ---
 
 ## 7. 実実装フェーズ（マイルストーン）
-- Phase 1: 細分化ディレクトリ作成 ＆ DB・マイグレーション構築
-- Phase 2: JWT認証ガード ＆ 基本 Sheets API 同期（背景色変換・マッピング）
-- Phase 3: `csv_parser.py` ＆ `assign_engine.py` （自動アサイン・For2・男女判定）
-- Phase 4: おすすめ場所管理（QR生成） ＆ 連動型清掃システム・アラートUI
-- Phase 5: スプレッドシート自動書き戻し ＆ 全体最適化・テスト
 
+**【方針変更】** 既存のディレクトリ構造を維持し、以下の順序で開発を進める：
+
+1. **Phase 1: Google スプレッドシート連携強化**
+   - シート ID・マッピング設定の UI 実装
+   - 背景色に基づいたステータス自動判定の実装
+   - データ双方向同期の確立
+
+2. **Phase 2: 認証機能の拡充**
+   - JWT 認証の完善
+   - ロールベースアクセス制御（admin/staff）
+
+3. **Phase 3: 自動アサイン機能**
+   - CSV アップロード UI
+   - アサインエンジンの最適化（男女別・連泊移動最小化・For2 対応）
+
+4. **Phase 4: 清掃管理・おすすめ情報**
+   - 清掃ステータス管理 UI
+   - ゲスト向け QR コード生成
+
+5. **Phase 5: 全体最適化・テスト**
+   - エンドツーエンドテスト
+   - パフォーマンスチューニング

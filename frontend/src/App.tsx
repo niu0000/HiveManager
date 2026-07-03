@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import AutoAssign from './pages/AutoAssign';
+import SheetSettings from './pages/SheetSettings';
 
 // ダミーページコンポーネント
 const Placeholder = ({ title }: { title: string }) => (
@@ -109,6 +110,7 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/auto-assign" element={<ProtectedRoute><AutoAssign /></ProtectedRoute>} />
+        <Route path="/sheet-settings" element={<ProtectedRoute><SheetSettings /></ProtectedRoute>} />
         <Route path="/recommendations" element={<ProtectedRoute><Placeholder title="京都おすすめ" /></ProtectedRoute>} />
         <Route path="/alerts" element={<ProtectedRoute><Placeholder title="アラート一覧" /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Placeholder title="設定" /></ProtectedRoute>} />
