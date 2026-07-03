@@ -1,30 +1,14 @@
 from pydantic_settings import BaseSettings
-from typing import Optional
 import os
 
-
 class Settings(BaseSettings):
-    # Database
-    database_url: str = "sqlite:///./data/sqlite/dormitory.db"
-    
-    # Google Sheets API
-    google_service_account_file: str = "service_account.json"
-    google_sheet_id: str = ""
-    
-    # JWT Settings
-    jwt_secret_key: str = "change-this-secret-key-in-production"
-    jwt_algorithm: str = "HS256"
-    access_token_expire_minutes: int = 30
-    
-    # Application Settings
-    app_name: str = "Dormitory Manager"
-    debug: bool = True
-    host: str = "0.0.0.0"
-    port: int = 8000
+    DATABASE_URL: str = "sqlite:///./data/dormitory.db"
+    SECRET_KEY: str = "change-this-secret-key-in-production-please-use-long-random-string"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
+    GOOGLE_SCOPES: str = "https://www.googleapis.com/auth/spreadsheets"
     
     class Config:
         env_file = ".env"
-        case_sensitive = False
-
 
 settings = Settings()

@@ -2,20 +2,15 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from app.config import settings
-import os
-
-# Ensure data directory exists
-os.makedirs("./data/sqlite", exist_ok=True)
 
 engine = create_engine(
-    settings.database_url,
-    connect_args={"check_same_thread": False} if "sqlite" in settings.database_url else {}
+    settings.DATABASE_URL,
+    connect_args={"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {}
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
-
 
 def get_db():
     db = SessionLocal()
@@ -23,3 +18,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
+def init_db():
+    from app.models.base import Base
+    Base.metadata.create_all(bind=engine)
