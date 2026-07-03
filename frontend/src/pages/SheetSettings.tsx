@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/api';
+import { sheetsApi } from '../lib/api';
 
 interface ColumnMapping {
   spreadsheetColumn: string;
@@ -23,12 +23,12 @@ const SheetSettings: React.FC = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await api.get('/settings/sheet');
-        if (res.data) {
-          setSpreadsheetId(res.data.spreadsheet_id || '');
-          setSheetName(res.data.sheet_name || 'Sheet1');
-          if (res.data.mappings) {
-            setMappings(res.data.mappings);
+        const res = await sheetsApi.getSettings();
+        if (res) {
+          setSpreadsheetId(res.spreadsheet_id || '');
+          setSheetName(res.sheet_name || 'Sheet1');
+          if (res.mappings) {
+            setMappings(res.mappings);
           }
         }
       } catch (err) {
@@ -50,11 +50,8 @@ const SheetSettings: React.FC = () => {
     setMessage(null);
 
     try {
-      await api.post('/settings/sheet', {
-        spreadsheet_id: spreadsheetId,
-        sheet_name: sheetName,
-        mappings: mappings,
-      });
+      await sheetsApi.updateSetting('spreadsheet_id', spreadsheetId, 'Google Spreadsheet ID');
+      await sheetsApi.updateSetting('sheet_name', sheetName, 'Google Sheet Name');
       setMessage({ type: 'success', text: '設定を保存しました' });
     } catch (err: any) {
       setMessage({ 
