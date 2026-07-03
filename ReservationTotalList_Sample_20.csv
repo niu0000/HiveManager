@@ -1,0 +1,21 @@
+﻿予約ID,予約区分,予約番号,泊目,チェックイン日,チェックアウト日,申込日,泊数,予約サイト,部屋タイプ,商品プラン,室数,宿泊者氏名(名),宿泊者氏名(姓),電話番号,郵便番号,住所1,メールアドレス,大人人数,食事,料金合計(税サ込),法人情報,大人単価,子供単価,幼児単価,大人会計額,子供会計額,幼児会計額,その他料金,その他会計額
+6800,予約,3746317213_01,,2026/06/19,2026/06/20,2026/06/17,1,Booking.com,Female,Standard Room Plan,1,Elijah,Jones,9.21E+12,,ドイツ,elijah.792@example.com,1,外食等又はなし,2500,Jone,2500,0,0,2500,0,0,0,5.8E+07
+6801,予約,1939042955_01,,2026/06/23,2026/06/24,2026/06/21,1,Expedia,Standard Twin,Standard Room Plan,1,Ethan,Wilson,5.10E+10,,フランス,ethan.559@example.com,1,外食等又はなし,2500,Wils,2500,0,0,2500,0,0,0,5.8E+07
+6802,予約,8574149614_01,,2026/06/16,2026/06/17,2026/06/12,1,じゃらん,Female,Standard Room Plan,1,Noah,Lopez,5.15E+12,,カナダ,noah.718@example.com,2,外食等又はなし,2500,Lope,2500,0,0,2500,0,0,0,5.8E+07
+6803,予約,9928378856_01,,2026/06/24,2026/06/27,2026/06/21,3,Booking.com,Double,Standard Room Plan,1,Daniel,Miller,4.47E+10,,ドイツ,daniel.146@example.com,2,外食等又はなし,7128,Mill,2376,0,0,7128,0,0,0,5.8E+07
+6804,予約,8877444318_01,,2026/06/20,2026/06/22,2026/06/17,2,Agoda,Double,Standard Room Plan,1,Sophia,Rodriguez,3.78E+12,,ドイツ,sophia.723@example.com,2,外食等又はなし,4752,Rodr,2376,0,0,4752,0,0,0,5.8E+07
+6805,予約,1240251661_01,,2026/06/20,2026/06/21,2026/06/16,1,楽天トラベル,Double,Standard Room Plan,1,Isabella,Williams,6.37E+12,,フランス,isabella.680@example.com,1,外食等又はなし,2500,Will,2500,0,0,2500,0,0,0,5.8E+07
+6806,予約,2137651678_01,,2026/06/23,2026/06/25,2026/06/18,2,じゃらん,Double,Standard Room Plan,1,Isabella,Jackson,7.56E+10,,韓国,isabella.697@example.com,1,外食等又はなし,4752,Jack,2376,0,0,4752,0,0,0,5.8E+07
+6807,予約,4246059658_01,,2026/06/17,2026/06/18,2026/06/15,1,Expedia,Female,Standard Room Plan,1,Henry,Martin,7.86E+11,,ドイツ,henry.494@example.com,1,外食等又はなし,2800,Mart,2800,0,0,2800,0,0,0,5.8E+07
+6808,予約,8047877267_01,,2026/06/19,2026/06/20,2026/06/15,1,Booking.com,Standard Twin,Standard Room Plan,1,Oliver,Anderson,5.74E+10,,アメリカ,oliver.839@example.com,1,外食等又はなし,2800,Ande,2800,0,0,2800,0,0,0,5.8E+07
+6809,予約,5951406973_01,,2026/06/23,2026/06/25,2026/06/18,2,Agoda,Female,Standard Room Plan,1,Emma,Martin,1.24E+11,,カナダ,emma.600@example.com,1,外食等又はなし,4860,Mart,2430,0,0,4860,0,0,0,5.8E+07
+6810,予約,5067116918_01,,2026/06/22,2026/06/23,2026/06/21,1,じゃらん,Double,Standard Room Plan,1,Ethan,Jones,8.80E+10,,イギリス,ethan.775@example.com,1,外食等又はなし,2430,Jone,2430,0,0,2430,0,0,0,5.8E+07
+6811,予約,3962958940_01,,2026/06/21,2026/06/24,2026/06/18,3,Booking.com,Male,Standard Room Plan,1,Alexander,Taylor,4.38E+10,,台湾,alexander.223@example.com,1,外食等又はなし,7290,Tayl,2430,0,0,7290,0,0,0,5.8E+07
+6812,予約,1030884438_01,,2026/06/18,2026/06/19,2026/06/17,1,Agoda,Male,Standard Room Plan,1,Liam,Hernandez,4.45E+12,,ドイツ,liam.626@example.com,2,外食等又はなし,2500,Hern,2500,0,0,2500,0,0,0,5.8E+07
+6813,予約,2748309234_01,,2026/06/16,2026/06/17,2026/06/12,1,Booking.com,Double,Standard Room Plan,1,Benjamin,Wilson,1.96E+12,,韓国,benjamin.578@example.com,2,外食等又はなし,2200,Wils,2200,0,0,2200,0,0,0,5.8E+07
+6814,予約,1469306919_01,,2026/06/18,2026/06/20,2026/06/13,2,楽天トラベル,Female,Standard Room Plan,1,Alexander,Jones,5.69E+10,,韓国,alexander.287@example.com,1,外食等又はなし,4400,Jone,2200,0,0,4400,0,0,0,5.8E+07
+6815,予約,2015242176_01,,2026/06/22,2026/06/26,2026/06/18,4,楽天トラベル,Standard Twin,Standard Room Plan,1,Sophia,Gonzalez,7.10E+11,,アメリカ,sophia.268@example.com,2,外食等又はなし,9720,Gonz,2430,0,0,9720,0,0,0,5.8E+07
+6816,予約,3090237817_01,,2026/06/19,2026/06/21,2026/06/17,2,楽天トラベル,Male,Standard Room Plan,1,Liam,Jackson,6.17E+10,,シンガポール,liam.162@example.com,1,外食等又はなし,5600,Jack,2800,0,0,5600,0,0,0,5.8E+07
+6817,予約,1798112150_01,,2026/06/18,2026/06/19,2026/06/14,1,じゃらん,Standard Twin,Standard Room Plan,1,Noah,Jackson,1.89E+10,,フランス,noah.692@example.com,2,外食等又はなし,2500,Jack,2500,0,0,2500,0,0,0,5.8E+07
+6818,予約,8370987661_01,,2026/06/19,2026/06/21,2026/06/15,2,じゃらん,Female,Standard Room Plan,1,Ava,Martinez,2.11E+11,,台湾,ava.423@example.com,1,外食等又はなし,5600,Mart,2800,0,0,5600,0,0,0,5.8E+07
+6819,予約,3309122187_01,,2026/06/17,2026/06/20,2026/06/14,3,じゃらん,Female,Standard Room Plan,1,Olivia,Davis,3.66E+12,,カナダ,olivia.391@example.com,2,外食等又はなし,7290,Davi,2430,0,0,7290,0,0,0,5.8E+07
