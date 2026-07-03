@@ -1,67 +1,61 @@
+import axios from 'axios';
+
 const API_BASE_URL = 'http://localhost:8000/api';
 
-// 認証ヘッダーを取得
-const getAuthHeaders = () => {
+export const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// 認証トークンの自動付与
+api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
-
-// 汎用 API リクエスト関数
-const request = async (endpoint: string, options: RequestInit = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`;
-  const headers = {
-    ...options.headers,
-    ...getAuthHeaders(),
-  };
-
-  const res = await fetch(url, { ...options, headers });
-  
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ detail: 'Request failed' }));
-    throw new Error(error.detail || 'Request failed');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-  
-  return res.json();
-};
+  return config;
+});
 
-// Dashboard API
-export const dashboardApi = {
-  getStatus: () => request('/dashboard/status'),
-};
-
-// Sheets API
-export const sheetsApi = {
-  testConnection: () => request('/sheets/test'),
-  getSettings: () => request('/settings'),
-  updateSetting: (key: string, value: string, description?: string) => 
-    request('/settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, value, description }),
-    }),
-};
-
-// Sync API
-export const syncApi = {
-  importFromSheet: () => request('/sync/import', { method: 'POST' }),
-  exportToSheet: () => request('/sync/export', { method: 'POST' }),
-  getBackgroundColors: (spreadsheetId: string, range?: string) => 
-    request(`/sheets/colors?spreadsheet_id=${spreadsheetId}&range=${range || 'Sheet1!A1:Z1000'}`),
-};
-
-// Auth API
 export const authApi = {
-  login: (username: string, password: string) => {
+  login: async (username: string, password: string) => {
     const formData = new FormData();
     formData.append('username', username);
     formData.append('password', password);
     
-    return fetch(`${API_BASE_URL}/auth/token`, {
-      method: 'POST',
-      body: formData,
-    }).then(res => {
-      if (!res.ok) throw new Error('Login failed');
-      return res.json();
+    const res = await api.post('/auth/token', formData, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
+    return res.data;
+  },
+};
+
+export const dashboardApi = {
+  getStatus: async () => {
+    // ダミーデータ返却（バックエンド実装待ち用）
+    return {
+      checkInToday: 18,
+      checkOutToday: 15,
+      availableBeds: 12,
+      totalBeds: 74,
+      alerts: [{ id: 1, message: 'オーバーブックの可能性（1 件）', type: 'warning' }],
+      errors: [],
+    };
+  },
+};
+
+export const assignmentApi = {
+  uploadCsv: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await api.post('/reservations/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data;
+  },
+  runAutoAssign: async () => {
+    const res = await api.post('/assignments/run');
+    return res.data;
   },
 };
