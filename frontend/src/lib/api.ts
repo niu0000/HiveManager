@@ -1,17 +1,22 @@
 const API_BASE_URL = 'http://localhost:8000/api';
 
 // 認証ヘッダーを取得
-const getAuthHeaders = () => {
+const getAuthHeaders = (): Record<string, string> => {
   const token = localStorage.getItem('token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  if (token) {
+    return { Authorization: `Bearer ${token}` };
+  }
+  return {};
 };
 
 // 汎用 API リクエスト関数
 const request = async (endpoint: string, options: RequestInit = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
-  const headers = {
-    ...options.headers,
-    ...getAuthHeaders(),
+  const authHeaders = getAuthHeaders();
+  const incomingHeaders = options.headers as Record<string, string> || {};
+  const headers: Record<string, string> = {
+    ...incomingHeaders,
+    ...authHeaders,
   };
 
   const res = await fetch(url, { ...options, headers });
@@ -65,3 +70,19 @@ export const authApi = {
     });
   },
 };
+
+// Assignment API
+export const assignmentApi = {
+  uploadCsv: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    return request('/assignments/upload', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+  runAutoAssign: () => request('/assignments/auto-assign', { method: 'POST' }),
+};
+
+export default request;
