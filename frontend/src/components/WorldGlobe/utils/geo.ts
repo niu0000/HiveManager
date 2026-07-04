@@ -5,17 +5,26 @@
  * @param lat 緯度（-90 〜 90）
  * @param lng 経度（-180 〜 180）
  * @param radius 球体の半径
- * @returns [x, y, z] 座標
+ * @returns {x, y, z} 座標
  */
-export function latLngToXYZ(lat: number, lng: number, radius: number): [number, number, number] {
+export function latLngToXyz(lat: number, lng: number, radius: number): { x: number; y: number; z: number } {
   const phi = (90 - lat) * (Math.PI / 180);
   const theta = (lng + 180) * (Math.PI / 180);
-
+  
   const x = -radius * Math.sin(phi) * Math.cos(theta);
   const y = radius * Math.cos(phi);
   const z = radius * Math.sin(phi) * Math.sin(theta);
+  
+  return { x, y, z };
+}
 
-  return [x, y, z];
+/**
+ * 旧版：緯度経度を Three.js の 3D 座標に変換（配列版）
+ * @deprecated 新版 latLngToXyz を使用してください
+ */
+export function latLngToXYZ(lat: number, lng: number, radius: number): [number, number, number] {
+  const result = latLngToXyz(lat, lng, radius);
+  return [result.x, result.y, result.z];
 }
 
 /**
