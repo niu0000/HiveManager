@@ -1,15 +1,17 @@
-// GlobeCanvas コンポーネント - Three.js 地球儀表示
+// GlobeCanvas コンポーネント - Three.js 地球儀表示（フェーズ 4 対応）
 
 import { useRef } from 'react';
 import { useGlobe } from '../hooks/useGlobe';
+import type { Landmark } from '../data/landmarks';
 
 interface GlobeCanvasProps {
   onCountryClick?: (countryName: string, lat: number, lng: number) => void;
+  onLandmarkClick?: (landmark: Landmark) => void;
 }
 
-export default function GlobeCanvas({ onCountryClick }: GlobeCanvasProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { isLoading, error } = useGlobe(containerRef, { onCountryClick });
+export default function GlobeCanvas({ onCountryClick, onLandmarkClick }: GlobeCanvasProps) {
+  const containerRef = useRef<HTMLDivElement>(null!);
+  const { isLoading, error } = useGlobe(containerRef, { onCountryClick, onLandmarkClick });
 
   return (
     <div className="relative w-full h-full">
@@ -40,8 +42,17 @@ export default function GlobeCanvas({ onCountryClick }: GlobeCanvasProps) {
       {!isLoading && !error && (
         <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-md">
           <p className="text-xs text-gray-600">
-            🖱️ ドラッグ：回転 | スクロール：ズーム | クリック：国を選択
+            🖱️ ドラッグ：回転 | スクロール：ズーム | クリック：国を選択 | ランドマーク：ジャンプ✨ | ダブルクリック：ズームイン
           </p>
+        </div>
+      )}
+
+      {/* ポップな装飾 */}
+      {!isLoading && !error && (
+        <div className="absolute top-4 right-4 flex space-x-2">
+          <div className="bg-yellow-400/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-white animate-pulse">
+            ✨ Pop Globe
+          </div>
         </div>
       )}
     </div>

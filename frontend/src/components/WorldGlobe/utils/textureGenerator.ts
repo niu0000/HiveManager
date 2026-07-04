@@ -137,22 +137,22 @@ function strokePolygon(
 }
 
 /**
- * 国ごとの色を生成（イラスト風パステルカラー）
+ * 国ごとの色を生成（ポップなパステルカラー）
  */
 function getCountryColor(index: number): string {
   const colors = [
-    '#4A8B3F', // 緑
-    '#5BA36D',
-    '#6BC98E',
-    '#7FB87F',
-    '#8FA890',
-    '#A3C9A8',
-    '#B8D8BD',
-    '#7CB3A8',
-    '#6BA398',
-    '#5A9388',
-    '#8BB8A8',
-    '#9AC8B8',
+    '#FF6B6B', // コーラルレッド
+    '#FFD93D', // イエロー
+    '#6BCB77', // ミントグリーン
+    '#4D96FF', // ブルー
+    '#FF85A2', // ピンク
+    '#A78BFA', // パープル
+    '#F472B6', // ローズ
+    '#34D399', // エメラルド
+    '#FB923C', // オレンジ
+    '#60A5FA', // スカイブルー
+    '#C084FC', // ラベンダー
+    '#2DD4BF', // ティール
   ];
   return colors[index % colors.length];
 }
