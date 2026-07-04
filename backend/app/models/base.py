@@ -85,6 +85,11 @@ class Assignment(Base):
     check_out_date = Column(DateTime, nullable=False)
     status = Column(SQLEnum(AssignmentStatus), default=AssignmentStatus.PENDING)
     assigned_at = Column(DateTime, default=datetime.utcnow)
+    is_locked = Column(Boolean, default=False)  # 手動確定ロックフラグ
+    lock_reason = Column(String, nullable=True)  # ロック理由
+    locked_by = Column(String, nullable=True)  # ロックしたユーザー
+    locked_at = Column(DateTime, nullable=True)  # ロック日時
+    assign_reason = Column(String, nullable=True)  # アサイン理由（説明可能性）
     reservation = relationship("Reservation", back_populates="assignments")
     bed = relationship("Bed", back_populates="assignments")
 
