@@ -9,6 +9,18 @@ build/
 *.ts
 *.tsx
 *.jsx
+target/
+
+# Environment variables
+.env
+.env.local
+*.env.*
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
 # Environment variables
 .env
@@ -16,6 +28,11 @@ build/
 *.env.*
 
 # IDE specific
+# Temporary files
+*.tmp
+*.temp
+
+# Editor files
 .vscode/
 .idea/
 *.swp
@@ -23,6 +40,9 @@ build/
 
 # Logs
 *.log
+# OS generated files
+.DS_Store
+Thumbs.db
 
 # Coverage reports
 coverage/
@@ -50,6 +70,13 @@ venv/
 .venv/
 env/
 ENV/
+# TypeScript/JavaScript build artifacts
+*.js.map
+*.tsbuildinfo
+
+# Package lock files
+package-lock.json
+yarn.lock
 
 # Testing
 .mypy_cache/
@@ -71,6 +98,7 @@ zig-out/
 julia-*/
 
 # Compressed files
+# Compression files
 *.zip
 *.gz
 *.tar
