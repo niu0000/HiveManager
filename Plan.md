@@ -1,8 +1,9 @@
-# 【コンテキスト保持用】宿泊管理システム（Dormitory Manager）システム開発マスター仕様書 v2.8
+# 【コンテキスト保持用】宿泊管理システム（Dormitory Manager）システム開発マスター仕様書 v3.0
 
 ## 1. プログラム全体原則（最重要）
 - 【単一責任・細分化の徹底】一つのファイルや関数にロジックを詰め込まない。修正・テストを容易にするため、サービス・API・バリデーションは機能単位で極小のモジュール（ファイル）に完全細分化する。
 - 【ハードコードの完全排除】列位置、ベッド番号範囲、ステータスの背景色など、運用の変化に伴う設定値はすべて DB（UI 経由で変更可能）から動的に引き当てる。
+- 【カプセルホテル仕様】一部屋がそのまま一ベッドとして機能するカプセルホテル形式を採用。部屋＝ベッドとして扱い、タイムライン形式で予約状況を可視化する。
 
 ---
 
@@ -13,6 +14,7 @@
 - 認証方式：JWT (JSON Web Tokens) による Role-based アクセス制御 (admin / staff)
 - 外部連携：Google Sheets API v4 (セルの値・effectiveFormat.backgroundColor の双方向同期)
 - セキュリティ：bcrypt (パスワードハッシュ化), CORS 制限，Rate Limiting (ログイン試行制限)
+- **実行環境**: Docker は使用せず、ローカル環境で直接実行
 
 ---
 
@@ -68,8 +70,8 @@ backend/
 ## 4. データベース設計（主要テーブル定義）
 
 ### 4.1 rooms / beds
-- `rooms`: 部屋マスタ（name, room_type, attributes）
-- `beds`: ベッドマスタ（room_id, bed_number, position）
+- `rooms`: 部屋マスタ（name, room_type, attributes）- カプセルホテル仕様では部屋＝ベッドとして扱う
+- `beds`: ベッドマスタ（room_id, bed_number, position）- 各部屋に 1 つのベッドが存在
 
 ### 4.2 reservations（予約・アサインデータ）
 - ねっぱん CSV から取り込んだ予約情報全体
@@ -80,10 +82,11 @@ backend/
 
 ### 4.7 bed_timelines（ベッドタイムライン表示用ビュー/クエリ）
 - **カプセルホテル仕様対応**: 一部屋に一人の運用のため、ベッド単位でのタイムライン表示を標準とする
-- 各ベッドの予約状況を日付順に時系列表示
-- フロントエンドでは横軸：日付、縦軸：ベッド番号のマトリックス形式で可視化
+- 各ベッド（＝部屋）の予約状況を日付順に時系列表示
+- フロントエンドでは横軸：日付、縦軸：ベッド番号（部屋番号）のマトリックス形式で可視化
 - データベースからは `assignments` テーブルを `bed_id`, `check_in_date` でソートして取得
 - ステータス別カラーリング（予約済、チェックイン済み、チェックアウト済み、清掃中、メンテナンス中）
+- **タイムライン形式**: 各ベッドの予約状況を横長のタイムラインとして表示し、連泊状況や空き状況を直感的に把握可能
 
 ### 4.4 cleaning_records（清掃記録）
 - `bed_id`, `status`, `staff_name`, `started_at`, `completed_at`, `notes`
@@ -163,7 +166,7 @@ backend/
        - チェックイン順序だけでなく、全体のバランスを見て最適な配置を決定
      * **手動確定・ロック機能**:
        - スタッフが特定のベッド（上段/下段）を指定し「確定（ロック）」可能
-       - 手動確定された割り当ては、自動アサインエンジンによる上書きを防止（`is_locked=True`）
+       - 手動確定された割り当ては、自動ア_assign エンジンによる上書きを防止（`is_locked=True`）
        - 延長予約が発生しても、ロック状態を維持し連続性を保証
        - 競合解決優先度：`手動確定 > 長期連泊 (スマート階層) > 通常予約` の順で厳格に優先
        - 誰が・いつ・どの理由でロックしたかを記録（監査証跡）
@@ -208,3 +211,193 @@ backend/
 5. **Phase 5: 全体最適化・テスト**
    - エンドツーエンドテスト
    - パフォーマンスチューニング
+
+---
+
+## 8. ローカル環境構築手順（Docker なし）
+
+### 8.1 前提条件
+- Python 3.10 以上
+- Node.js 18 以上
+- npm または yarn
+
+### 8.2 バックエンドセットアップ
+
+```bash
+# backend ディレクトリに移動
+cd backend
+
+# 仮想環境作成（推奨）
+python -m venv venv
+
+# 仮想環境アクティベート
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+
+# 依存パッケージインストール
+pip install -r requirements.txt
+
+# 環境変数設定（.env ファイル作成）
+cp .env.example .env
+# .env ファイルを編集して必要な設定を記述
+
+# データベース初期化
+python init_db.py
+
+# バックエンド起動
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### 8.3 フロントエンドセットアップ
+
+```bash
+# frontend ディレクトリに移動
+cd frontend
+
+# 依存パッケージインストール
+npm install
+
+# 開発サーバー起動
+npm run dev
+```
+
+### 8.4 アプリケーションアクセス
+- フロントエンド：http://localhost:5173
+- バックエンド API：http://localhost:8000
+- API ドキュメント：http://localhost:8000/docs
+
+---
+
+## 9. 配布方法
+
+### 9.1 配布パッケージ作成
+
+#### バックエンド
+```bash
+# backend ディレクトリで実行
+# 依存パッケージの一覧出力
+pip freeze > requirements.txt
+
+# 配布用ディレクトリ作成
+mkdir -p dist/backend
+cp -r app dist/backend/
+cp requirements.txt dist/backend/
+cp init_db.py dist/backend/
+cp .env.example dist/backend/
+
+# ZIP パッケージ作成
+cd dist
+zip -r hive_manager_backend.zip backend/
+```
+
+#### フロントエンド
+```bash
+# frontend ディレクトリで実行
+# 本番ビルド
+npm run build
+
+# 配布用ディレクトリ作成
+mkdir -p dist/frontend
+cp -r dist/* dist/frontend/
+cp package.json dist/frontend/
+cp README.md dist/frontend/
+
+# ZIP パッケージ作成
+cd dist
+zip -r hive_manager_frontend.zip frontend/
+```
+
+### 9.2 配布マニュアル
+
+#### ユーザー向けインストール手順
+
+1. **事前準備**
+   - Python 3.10 以上のインストール確認
+   - Node.js 18 以上のインストール確認
+
+2. **バックエンドのセットアップ**
+   ```bash
+   # 展開
+   unzip hive_manager_backend.zip
+   cd backend
+   
+   # 仮想環境作成
+   python -m venv venv
+   
+   # 仮想環境アクティベート
+   # Windows:
+   venv\Scripts\activate
+   # macOS/Linux:
+   source venv/bin/activate
+   
+   # 依存パッケージインストール
+   pip install -r requirements.txt
+   
+   # 環境変数設定
+   cp .env.example .env
+   # .env ファイルを編集
+   
+   # データベース初期化
+   python init_db.py
+   
+   # サーバー起動
+   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   ```
+
+3. **フロントエンドのセットアップ**
+   ```bash
+   # 展開
+   unzip hive_manager_frontend.zip
+   cd frontend
+   
+   # 依存パッケージインストール
+   npm install
+   
+   # 開発サーバー起動
+   npm run dev
+   ```
+
+4. **動作確認**
+   - ブラウザで http://localhost:5173 にアクセス
+   - ログイン画面が表示されれば成功
+
+### 9.3 更新手順
+
+#### バックエンド更新
+```bash
+# 仮想環境アクティベート
+source venv/bin/activate  # または venv\Scripts\activate
+
+# 依存パッケージ更新
+pip install -r requirements.txt --upgrade
+
+# データベースマイグレーション（必要な場合）
+python init_db.py
+
+# サーバー再起動
+# 一度 Ctrl+C で停止後、再度起動
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+#### フロントエンド更新
+```bash
+# 依存パッケージ更新
+npm install
+
+# 再ビルド
+npm run build
+
+# 開発サーバー再起動
+# 一度 Ctrl+C で停止後、再度起動
+npm run dev
+```
+
+### 9.4 トラブルシューティング
+
+- **ポートが使用中**: ポート番号を変更（backend: 8000→8001, frontend: 5173→5174）
+- **依存パッケージのエラー**: `pip cache purge` または `rm -rf node_modules && npm install`
+- **データベースエラー**: `init_db.py` を再実行して DB を再初期化
+
+---
