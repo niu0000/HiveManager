@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import AutoAssign from './pages/AutoAssign';
 import SheetSettings from './pages/SheetSettings';
+import WorldGlobe from './components/WorldGlobe/WorldGlobe';
 
 // ダミーページコンポーネント
 const Placeholder = ({ title }: { title: string }) => (
@@ -109,6 +110,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/world" element={<ProtectedRoute><WorldGlobe /></ProtectedRoute>} />
         <Route path="/auto-assign" element={<ProtectedRoute><AutoAssign /></ProtectedRoute>} />
         <Route path="/sheet-settings" element={<ProtectedRoute><SheetSettings /></ProtectedRoute>} />
         <Route path="/recommendations" element={<ProtectedRoute><Placeholder title="京都おすすめ" /></ProtectedRoute>} />
