@@ -11,7 +11,7 @@ export interface UseGlobeOptions {
   onCountryClick?: (countryName: string, lat: number, lng: number) => void;
 }
 
-export function useGlobe(containerRef: React.RefObject<HTMLDivElement>, options: UseGlobeOptions = {}) {
+export function useGlobe(containerRef: React.RefObject<HTMLDivElement | null>, options: UseGlobeOptions = {}) {
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
