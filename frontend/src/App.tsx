@@ -4,6 +4,10 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import AutoAssign from './pages/AutoAssign';
 import SheetSettings from './pages/SheetSettings';
+import BedMap from './pages/BedMap';
+import Recommendations from './pages/Recommendations';
+import Alerts from './pages/Alerts';
+import Settings from './pages/Settings';
 import WorldGlobe from './components/WorldGlobe/WorldGlobe';
 
 // ダミーページコンポーネント
@@ -113,9 +117,10 @@ export default function App() {
         <Route path="/world" element={<ProtectedRoute><WorldGlobe /></ProtectedRoute>} />
         <Route path="/auto-assign" element={<ProtectedRoute><AutoAssign /></ProtectedRoute>} />
         <Route path="/sheet-settings" element={<ProtectedRoute><SheetSettings /></ProtectedRoute>} />
-        <Route path="/recommendations" element={<ProtectedRoute><Placeholder title="京都おすすめ" /></ProtectedRoute>} />
-        <Route path="/alerts" element={<ProtectedRoute><Placeholder title="アラート一覧" /></ProtectedRoute>} />
-        <Route path="/settings" element={<ProtectedRoute><Placeholder title="設定" /></ProtectedRoute>} />
+        <Route path="/bed-map" element={<ProtectedRoute><BedMap /></ProtectedRoute>} />
+        <Route path="/recommendations" element={<ProtectedRoute><Recommendations /></ProtectedRoute>} />
+        <Route path="/alerts" element={<ProtectedRoute><Alerts /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );

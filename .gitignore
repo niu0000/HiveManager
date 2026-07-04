@@ -5,6 +5,10 @@ node_modules/
 # Build outputs
 dist/
 build/
+*.js
+*.ts
+*.tsx
+*.jsx
 target/
 
 # Environment variables
@@ -18,9 +22,12 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Logs
-*.log
+# Environment variables
+.env
+.env.local
+*.env.*
 
+# IDE specific
 # Temporary files
 *.tmp
 *.temp
@@ -31,6 +38,8 @@ __pycache__/
 *.swp
 *.swo
 
+# Logs
+*.log
 # OS generated files
 .DS_Store
 Thumbs.db
@@ -40,6 +49,27 @@ coverage/
 htmlcov/
 .coverage
 
+# Temporary files
+*.tmp
+*.temp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Python specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
 # TypeScript/JavaScript build artifacts
 *.js.map
 *.tsbuildinfo
@@ -54,6 +84,20 @@ yarn.lock
 .nyc_output/
 coverage/
 
+# Node specific
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build system
+target/
+.gradle/
+.cargo/
+zig-cache/
+zig-out/
+julia-*/
+
+# Compressed files
 # Compression files
 *.zip
 *.gz
