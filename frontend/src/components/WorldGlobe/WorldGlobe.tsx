@@ -3,8 +3,8 @@
 import { useState, useRef } from 'react';
 import { Globe } from 'lucide-react';
 import GlobeCanvas from './components/GlobeCanvas';
-import SearchBar from './components/SearchBar';
-import CountryPanel from './components/CountryPanel';
+import { SearchBar } from './components/SearchBar';
+import { CountryPanel } from './components/CountryPanel';
 import type { CountryData } from './data/countries';
 
 export default function WorldGlobe() {
