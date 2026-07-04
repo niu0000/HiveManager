@@ -20,16 +20,16 @@ export function generateGlobeTexture(geojson: any): Promise<THREE.CanvasTexture>
       return;
     }
 
-    // 海の背景（グラデーション）
+    // 海の背景（グラデーション - クレイ調）
     const gradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
-    gradient.addColorStop(0, '#1B5B8A');
-    gradient.addColorStop(0.5, '#2E7BB8');
-    gradient.addColorStop(1, '#1B5B8A');
+    gradient.addColorStop(0, '#2D3748');
+    gradient.addColorStop(0.5, '#4A5568');
+    gradient.addColorStop(1, '#2D3748');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    // 波模様のノイズ（簡易）
-    ctx.globalAlpha = 0.1;
+    // 波模様のノイズ（手描き風）
+    ctx.globalAlpha = 0.08;
     for (let i = 0; i < 500; i++) {
       const x = Math.random() * CANVAS_WIDTH;
       const y = Math.random() * CANVAS_HEIGHT;
@@ -56,10 +56,12 @@ export function generateGlobeTexture(geojson: any): Promise<THREE.CanvasTexture>
         }
       });
 
-      // 国境線の描画
+      // 国境線の描画（手描き風）
       ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 0.8;
-      ctx.globalAlpha = 0.6;
+      ctx.lineWidth = 1.2;
+      ctx.globalAlpha = 0.7;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
       geojson.features.forEach((feature: any) => {
         if (feature.geometry.type === 'Polygon') {
           strokePolygon(ctx, feature.geometry.coordinates, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -137,22 +139,25 @@ function strokePolygon(
 }
 
 /**
- * 国ごとの色を生成（ポップなパステルカラー）
+ * 国ごとの色を生成（クレイ調パステルカラー - #6C63FF ベースの統一テーマ）
  */
 function getCountryColor(index: number): string {
   const colors = [
+    '#6C63FF', // メインパープル
     '#FF6B6B', // コーラルレッド
     '#FFD93D', // イエロー
-    '#6BCB77', // ミントグリーン
-    '#4D96FF', // ブルー
+    '#4ECDC4', // ティールグリーン
     '#FF85A2', // ピンク
-    '#A78BFA', // パープル
+    '#4D96FF', // ブルー
+    '#A78BFA', // ラベンダー
     '#F472B6', // ローズ
     '#34D399', // エメラルド
     '#FB923C', // オレンジ
     '#60A5FA', // スカイブルー
-    '#C084FC', // ラベンダー
-    '#2DD4BF', // ティール
+    '#C084FC', // パープル
+    '#2DD4BF', // アクア
+    '#FBBF24', // アンバー
+    '#F87171', // レッド
   ];
   return colors[index % colors.length];
 }

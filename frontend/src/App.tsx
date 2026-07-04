@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
+import WorldGlobe from './components/WorldGlobe/WorldGlobe';
 import AutoAssign from './pages/AutoAssign';
 import SheetSettings from './pages/SheetSettings';
 import BedMap from './pages/BedMap';
@@ -103,6 +104,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/world-globe" element={<ProtectedRoute><WorldGlobe /></ProtectedRoute>} />
         <Route path="/auto-assign" element={<ProtectedRoute><AutoAssign /></ProtectedRoute>} />
         <Route path="/sheet-settings" element={<ProtectedRoute><SheetSettings /></ProtectedRoute>} />
         <Route path="/bed-map" element={<ProtectedRoute><BedMap /></ProtectedRoute>} />

@@ -1,4 +1,4 @@
-// useGlobe Hook - Three.js 地球儀の制御（ポップ ver）- フェーズ 4 対応
+// useGlobe Hook - Three.js 地球儀の制御（ポップ ver）- フェーズ 3 対応（SLERP/フローティングピン/コンパス）
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
@@ -31,6 +31,7 @@ export function useGlobe(containerRef: React.RefObject<HTMLDivElement | null>, o
   const previousMousePosition = useRef({ x: 0, y: 0 });
   const rotationVelocity = useRef({ x: 0, y: 0 });
   const landmarksRef = useRef<LandmarkObject[]>([]);
+  const pinsRef = useRef<THREE.Group[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -486,11 +487,212 @@ export function useGlobe(containerRef: React.RefObject<HTMLDivElement | null>, o
     animateFly();
   }, []);
 
+  // SLERP を使用した高度なフライアニメーション
+  const flyToSlerp = useCallback((lat: number, lng: number, duration: number = 1500) => {
+    if (!globeRef.current || !cameraRef.current) return;
+
+    const globe = globeRef.current;
+    const camera = cameraRef.current;
+
+    // 現在の回転をクォータニオンに変換
+    const startQuaternion = new THREE.Quaternion();
+    startQuaternion.setFromEuler(globe.rotation);
+
+    // ターゲット回転を計算
+    const targetEuler = new THREE.Euler(-lat * (Math.PI / 180), -lng * (Math.PI / 180), 0);
+    const targetQuaternion = new THREE.Quaternion();
+    targetQuaternion.setFromEuler(targetEuler);
+
+    // ズームターゲット
+    const startZ = camera.position.z;
+    const targetZ = 3.0;
+
+    const startTime = performance.now();
+
+    const easeInOutQuad = (t: number): number => {
+      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    };
+
+    const animateSlerp = () => {
+      const elapsed = performance.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easedProgress = easeInOutQuad(progress);
+
+      // SLERP でスムーズに回転
+      globe.quaternion.slerpQuaternions(startQuaternion, targetQuaternion, easedProgress);
+      globe.rotation.setFromQuaternion(globe.quaternion);
+
+      // カメラズーム
+      camera.position.z = startZ + (targetZ - startZ) * easedProgress;
+
+      if (progress < 1) {
+        requestAnimationFrame(animateSlerp);
+      }
+    };
+
+    animateSlerp();
+  }, []);
+
+  // フローティングピンを追加
+  const addFloatingPin = useCallback((lat: number, lng: number, color?: string, label?: string) => {
+    if (!sceneRef.current || !globeRef.current) return null;
+
+    const scene = sceneRef.current;
+    const radius = 1.52;
+
+    const pinGroup = new THREE.Group();
+    
+    // ピンの位置を計算
+    const phi = (90 - lat) * (Math.PI / 180);
+    const theta = (lng + 180) * (Math.PI / 180);
+    
+    const x = -(radius * Math.sin(phi) * Math.cos(theta));
+    const z = radius * Math.sin(phi) * Math.sin(theta);
+    const y = radius * Math.cos(phi);
+    
+    pinGroup.position.set(x, y, z);
+    pinGroup.lookAt(new THREE.Vector3(0, 0, 0));
+
+    // ピン本体（円錐）
+    const pinGeometry = new THREE.ConeGeometry(0.03, 0.12, 8);
+    const pinMaterial = new THREE.MeshStandardMaterial({
+      color: color || 0xFF6B6B,
+      roughness: 0.3,
+      metalness: 0.2,
+      emissive: color || 0xFF6B6B,
+      emissiveIntensity: 0.3,
+    });
+    const pin = new THREE.Mesh(pinGeometry, pinMaterial);
+    pin.rotation.x = Math.PI / 2;
+    pin.position.y = 0.06;
+    pinGroup.add(pin);
+
+    // ベース（球）
+    const baseGeometry = new THREE.SphereGeometry(0.04, 16, 16);
+    const baseMaterial = new THREE.MeshStandardMaterial({
+      color: 0xFFFFFF,
+      roughness: 0.2,
+      metalness: 0.3,
+    });
+    const base = new THREE.Mesh(baseGeometry, baseMaterial);
+    base.position.y = 0;
+    pinGroup.add(base);
+
+    // リング（トーラス）
+    const ringGeometry = new THREE.TorusGeometry(0.05, 0.008, 8, 24);
+    const ringMaterial = new THREE.MeshStandardMaterial({
+      color: color || 0xFF6B6B,
+      roughness: 0.3,
+      metalness: 0.4,
+      emissive: color || 0xFF6B6B,
+      emissiveIntensity: 0.2,
+    });
+    const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = 0.01;
+    pinGroup.add(ring);
+
+    // パーティクルエフェクト
+    for (let i = 0; i < 5; i++) {
+      const particleGeometry = new THREE.SphereGeometry(0.01, 8, 8);
+      const particleMaterial = new THREE.MeshBasicMaterial({
+        color: 0xFFFFFF,
+        transparent: true,
+        opacity: 0.6,
+      });
+      const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+      
+      const angle = (i / 5) * Math.PI * 2;
+      const distance = 0.08;
+      particle.position.x = Math.cos(angle) * distance;
+      particle.position.z = Math.sin(angle) * distance;
+      particle.position.y = 0.02;
+      
+      pinGroup.add(particle);
+    }
+
+    // ラベルテキスト（オプション）
+    if (label) {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        canvas.width = 256;
+        canvas.height = 64;
+        
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.roundRect(0, 0, canvas.width, canvas.height, 12);
+        ctx.fill();
+        
+        ctx.strokeStyle = color || '#FF6B6B';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        ctx.fillStyle = '#333';
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, canvas.width / 2, canvas.height / 2);
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+        const sprite = new THREE.Sprite(spriteMaterial);
+        sprite.position.y = 0.15;
+        sprite.scale.set(0.3, 0.075, 1);
+        
+        pinGroup.add(sprite);
+      }
+    }
+
+    scene.add(pinGroup);
+    pinsRef.current.push(pinGroup);
+    
+    return pinGroup;
+  }, []);
+
+  // フローティングピンを削除
+  const removeFloatingPin = useCallback((pin: THREE.Group) => {
+    if (!sceneRef.current) return;
+    
+    sceneRef.current.remove(pin);
+    pin.clear();
+    pin.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.geometry.dispose();
+        if (child.material instanceof THREE.Material) {
+          child.material.dispose();
+        }
+      }
+    });
+    
+    pinsRef.current = pinsRef.current.filter(p => p !== pin);
+  }, []);
+
+  // すべてのフローティングピンをクリア
+  const clearFloatingPins = useCallback(() => {
+    pinsRef.current.forEach(pin => {
+      if (!sceneRef.current) return;
+      sceneRef.current.remove(pin);
+      pin.clear();
+      pin.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          child.geometry.dispose();
+          if (child.material instanceof THREE.Material) {
+            child.material.dispose();
+          }
+        }
+      });
+    });
+    pinsRef.current = [];
+  }, []);
+
   return {
     isLoading,
     error,
     flyTo,
-    flyToLandmark,
+    flyToSlerp,
+    addFloatingPin,
+    removeFloatingPin,
+    clearFloatingPins,
     scene: sceneRef.current,
     camera: cameraRef.current,
     globe: globeRef.current,
