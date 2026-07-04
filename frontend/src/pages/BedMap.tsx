@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, User, XCircle, Clock, Filter } from 'lucide-react';
+import { XCircle, Clock } from 'lucide-react';
 
 // ==================== Types ====================
 
@@ -16,6 +16,7 @@ interface Bed {
   bed_number: string;
   position: 'upper' | 'lower';
   status?: 'available' | 'unavailable' | 'in_progress';
+  assignment?: Assignment;
 }
 
 interface Assignment {
@@ -26,19 +27,6 @@ interface Assignment {
   check_in_date: string;
   check_out_date: string;
   status: 'confirmed' | 'pending' | 'checked_in' | 'checked_out' | 'cancelled';
-}
-
-interface TimelineSlot {
-  date: string;
-  assignment?: Assignment;
-  isToday: boolean;
-  isWeekend: boolean;
-}
-
-interface BedTimelineRow {
-  bed: Bed;
-  room: Room;
-  slots: TimelineSlot[];
 }
 
 // ==================== Constants ====================
@@ -69,153 +57,12 @@ const WEEKDAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
 
 // ==================== Utility Functions ====================
 
-const formatDate = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
 const formatDisplayDate = (dateStr: string): string => {
   const date = new Date(dateStr);
   const month = date.getMonth() + 1;
   const day = date.getDate();
   const weekday = WEEKDAY_LABELS[date.getDay()];
   return `${month}/${day}(${weekday})`;
-};
-
-const getDatesInRange = (startDate: Date, days: number): string[] => {
-  const dates: string[] = [];
-  for (let i = 0; i < days; i++) {
-    const date = new Date(startDate);
-    date.setDate(date.getDate() + i);
-    dates.push(formatDate(date));
-  }
-  return dates;
-};
-
-const isToday = (dateStr: string): boolean => {
-  return dateStr === formatDate(new Date());
-};
-
-const isWeekend = (dateStr: string): boolean => {
-  const date = new Date(dateStr);
-  const day = date.getDay();
-  return day === 0 || day === 6;
-};
-
-const getAssignmentForDate = (assignments: Assignment[], bedId: number, date: string): Assignment | undefined => {
-  return assignments.find(a => 
-    a.bed_id === bedId && 
-    a.status !== 'cancelled' &&
-    a.status !== 'checked_out' &&
-    a.check_in_date <= date && 
-    a.check_out_date > date
-  );
-};
-
-// ==================== Components ====================
-
-interface TimelineCellProps {
-  slot: TimelineSlot;
-  assignment?: Assignment;
-  bedStatus?: 'unavailable' | 'in_progress';
-  onClick?: () => void;
-}
-
-const TimelineCell = ({ slot, assignment, bedStatus, onClick }: TimelineCellProps) => {
-  let bgColor = STATUS_COLORS.available;
-  let label = '';
-  let guestName = '';
-  
-  if (bedStatus === 'unavailable') {
-    bgColor = STATUS_COLORS.unavailable;
-    label = '×';
-  } else if (bedStatus === 'in_progress') {
-    bgColor = STATUS_COLORS.in_progress;
-    label = '清掃中';
-  } else if (assignment) {
-    bgColor = STATUS_COLORS[assignment.status] || STATUS_COLORS.pending;
-    guestName = assignment.guest_name || 'ゲスト';
-    label = formatDisplayDate(assignment.check_in_date) === formatDisplayDate(slot.date) 
-      ? 'IN' 
-      : formatDisplayDate(assignment.check_out_date) === formatDisplayDate(slot.date)
-      ? 'OUT'
-      : '';
-  }
-  
-  return (
-    <div
-      onClick={onClick}
-      className={`
-        min-w-[80px] h-16 rounded-lg border-2 cursor-pointer transition-all duration-150
-        flex flex-col items-center justify-center relative
-        ${bgColor}
-        ${slot.isToday ? 'border-primary-500 ring-2 ring-primary-200' : 'border-gray-200'}
-        ${slot.isWeekend && !assignment && !bedStatus ? 'bg-red-50' : ''}
-      `}
-    >
-      {label && (
-        <span className="text-xs font-bold text-white drop-shadow-sm">{label}</span>
-      )}
-      {guestName && !label && (
-        <span className="text-xs text-white font-medium truncate max-w-[70px]">{guestName}</span>
-      )}
-      {!label && !guestName && !bedStatus && (
-        <span className="text-xs text-gray-400">空き</span>
-      )}
-    </div>
-  );
-};
-
-interface BedTimelineRowProps {
-  row: BedTimelineRow;
-  onBedClick?: (bed: Bed, date?: string) => void;
-}
-
-const BedTimelineRowComponent = ({ row, onBedClick }: BedTimelineRowProps) => {
-  return (
-    <div className="flex items-center border-b border-gray-100 hover:bg-gray-50 transition-colors">
-      {/* Bed Info Column */}
-      <div className="sticky left-0 z-10 w-32 flex-shrink-0 bg-white border-r border-gray-200 p-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="font-bold text-gray-900 text-sm">{row.bed.bed_number}</div>
-            <div className="text-xs text-gray-500">{row.room.name}</div>
-          </div>
-          <div className="flex flex-col items-end gap-1">
-            {row.bed.position === 'upper' && (
-              <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded">上</span>
-            )}
-            {row.bed.position === 'lower' && (
-              <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded">下</span>
-            )}
-            {row.bed.status === 'unavailable' && (
-              <XCircle className="w-4 h-4 text-red-500" />
-            )}
-            {row.bed.status === 'in_progress' && (
-              <Clock className="w-4 h-4 text-orange-500" />
-            )}
-          </div>
-        </div>
-      </div>
-      
-      {/* Timeline Columns */}
-      <div className="flex-1 overflow-x-auto">
-        <div className="flex gap-2 p-3 min-w-max">
-          {row.slots.map((slot, idx) => (
-            <TimelineCell
-              key={idx}
-              slot={slot}
-              assignment={slot.assignment}
-              bedStatus={row.bed.status}
-              onClick={() => onBedClick?.(row.bed, slot.date)}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
 };
 
 export default function BedMap() {
@@ -242,15 +89,15 @@ export default function BedMap() {
         ];
         
         const dummyBeds: Bed[] = [
-          { id: 1, room_id: 1, bed_number: '101-1', position: 'lower', assignment: { id: 1, guest_name: '山田太郎', check_in_date: '2025-01-15', check_out_date: '2025-01-20', status: 'checked_in' } },
-          { id: 2, room_id: 1, bed_number: '101-2', position: 'upper', assignment: { id: 2, guest_name: '鈴木花子', check_in_date: '2025-01-16', check_out_date: '2025-01-18', status: 'confirmed' } },
+          { id: 1, room_id: 1, bed_number: '101-1', position: 'lower', assignment: { id: 1, bed_id: 1, guest_name: '山田太郎', check_in_date: '2025-01-15', check_out_date: '2025-01-20', status: 'checked_in' } },
+          { id: 2, room_id: 1, bed_number: '101-2', position: 'upper', assignment: { id: 2, bed_id: 2, guest_name: '鈴木花子', check_in_date: '2025-01-16', check_out_date: '2025-01-18', status: 'confirmed' } },
           { id: 3, room_id: 1, bed_number: '101-3', position: 'lower' },
           { id: 4, room_id: 1, bed_number: '101-4', position: 'upper', status: 'unavailable' },
-          { id: 5, room_id: 2, bed_number: '102-1', position: 'lower', assignment: { id: 3, guest_name: '佐藤次郎', check_in_date: '2025-01-17', check_out_date: '2025-01-22', status: 'pending' } },
+          { id: 5, room_id: 2, bed_number: '102-1', position: 'lower', assignment: { id: 3, bed_id: 5, guest_name: '佐藤次郎', check_in_date: '2025-01-17', check_out_date: '2025-01-22', status: 'pending' } },
           { id: 6, room_id: 2, bed_number: '102-2', position: 'upper' },
           { id: 7, room_id: 2, bed_number: '102-3', position: 'lower', status: 'in_progress' },
           { id: 8, room_id: 2, bed_number: '102-4', position: 'upper' },
-          { id: 9, room_id: 3, bed_number: '201-1', position: 'lower', assignment: { id: 4, guest_name: '高橋一家', check_in_date: '2025-01-15', check_out_date: '2025-01-25', status: 'checked_in' } },
+          { id: 9, room_id: 3, bed_number: '201-1', position: 'lower', assignment: { id: 4, bed_id: 9, guest_name: '高橋一家', check_in_date: '2025-01-15', check_out_date: '2025-01-25', status: 'checked_in' } },
           { id: 10, room_id: 3, bed_number: '201-2', position: 'lower' },
         ];
         
@@ -366,14 +213,42 @@ export default function BedMap() {
       </div>
 
       {/* Rooms Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="space-y-6">
         {filteredRooms.map((room) => (
-          <RoomCard
-            key={room.id}
-            room={room}
-            beds={getBedsForRoom(room.id)}
-            onBedClick={(bed) => setSelectedBed(bed)}
-          />
+          <div key={room.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-4 border-b border-gray-100 bg-gray-50">
+              <h3 className="font-bold text-gray-900">{room.name}</h3>
+              <p className="text-xs text-gray-500">{room.room_type === 'dormitory' ? 'ドミトリー' : 'プライベートルーム'}</p>
+            </div>
+            <div className="divide-y divide-gray-100">
+              {getBedsForRoom(room.id).map((bed) => (
+                <button
+                  key={bed.id}
+                  onClick={() => setSelectedBed(bed)}
+                  className="w-full p-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <span className="font-medium text-gray-900 mr-2">{bed.bed_number}</span>
+                    <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-600">
+                      {bed.position === 'upper' ? '上' : '下'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {bed.status === 'unavailable' && <XCircle className="w-4 h-4 text-red-500" />}
+                    {bed.status === 'in_progress' && <Clock className="w-4 h-4 text-orange-500" />}
+                    {bed.assignment && bed.assignment.status !== 'checked_out' && (
+                      <span className={`text-xs px-2 py-0.5 rounded text-white ${STATUS_COLORS[bed.assignment.status] || 'bg-gray-400'}`}>
+                        {STATUS_LABELS[bed.assignment.status]}
+                      </span>
+                    )}
+                    {!bed.assignment || bed.assignment?.status === 'checked_out' ? (
+                      <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">空き</span>
+                    ) : null}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 
@@ -392,6 +267,29 @@ export default function BedMap() {
               <div className="space-y-4">
                 <div>
                   <label className="text-sm text-gray-500">ゲスト名</label>
+                  <div className="mt-1 text-lg font-medium text-gray-900">{selectedBed.assignment.guest_name}</div>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">ステータス</label>
+                  <div className={`mt-1 inline-block px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[selectedBed.assignment.status] || 'bg-gray-100'} text-white`}>
+                    {STATUS_LABELS[selectedBed.assignment.status]}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">チェックイン</label>
+                  <div className="mt-1 text-gray-900">{formatDisplayDate(selectedBed.assignment.check_in_date)}</div>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">チェックアウト</label>
+                  <div className="mt-1 text-gray-900">{formatDisplayDate(selectedBed.assignment.check_out_date)}</div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="text-gray-500 mb-4">このベッドは空いています</div>
+              </div>
+            )}
+            
             <div className="mt-6 flex space-x-3">
               <button className="flex-1 bg-primary-600 text-white py-2 rounded-lg font-medium hover:bg-primary-700">
                 アサインする

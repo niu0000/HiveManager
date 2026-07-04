@@ -10,16 +10,6 @@ import Alerts from './pages/Alerts';
 import Settings from './pages/Settings';
 import WorldGlobe from './components/WorldGlobe/WorldGlobe';
 
-// ダミーページコンポーネント
-const Placeholder = ({ title }: { title: string }) => (
-  <div className="flex items-center justify-center h-full">
-    <div className="text-center">
-      <h2 className="text-2xl font-bold text-gray-400 mb-2">{title}</h2>
-      <p className="text-gray-400">開発中です</p>
-    </div>
-  </div>
-);
-
 // 簡易認証チェック
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
