@@ -4,17 +4,11 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import AutoAssign from './pages/AutoAssign';
 import SheetSettings from './pages/SheetSettings';
+import BedMap from './pages/BedMap';
+import Recommendations from './pages/Recommendations';
+import Alerts from './pages/Alerts';
+import Settings from './pages/Settings';
 import WorldGlobe from './components/WorldGlobe/WorldGlobe';
-
-// ダミーページコンポーネント
-const Placeholder = ({ title }: { title: string }) => (
-  <div className="flex items-center justify-center h-full">
-    <div className="text-center">
-      <h2 className="text-2xl font-bold text-gray-400 mb-2">{title}</h2>
-      <p className="text-gray-400">開発中です</p>
-    </div>
-  </div>
-);
 
 // 簡易認証チェック
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -113,9 +107,10 @@ export default function App() {
         <Route path="/world" element={<ProtectedRoute><WorldGlobe /></ProtectedRoute>} />
         <Route path="/auto-assign" element={<ProtectedRoute><AutoAssign /></ProtectedRoute>} />
         <Route path="/sheet-settings" element={<ProtectedRoute><SheetSettings /></ProtectedRoute>} />
-        <Route path="/recommendations" element={<ProtectedRoute><Placeholder title="京都おすすめ" /></ProtectedRoute>} />
-        <Route path="/alerts" element={<ProtectedRoute><Placeholder title="アラート一覧" /></ProtectedRoute>} />
-        <Route path="/settings" element={<ProtectedRoute><Placeholder title="設定" /></ProtectedRoute>} />
+        <Route path="/bed-map" element={<ProtectedRoute><BedMap /></ProtectedRoute>} />
+        <Route path="/recommendations" element={<ProtectedRoute><Recommendations /></ProtectedRoute>} />
+        <Route path="/alerts" element={<ProtectedRoute><Alerts /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );

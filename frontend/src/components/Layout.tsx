@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, Upload, MapPin, AlertTriangle, Settings, LogOut, 
-  Sun, Menu, X, Sheet, Globe 
+  Sun, Menu, X, Sheet, BedDouble, Globe 
 } from 'lucide-react';
 
 const formatTime = () => {
@@ -12,6 +12,7 @@ const formatTime = () => {
 
 const menuItems = [
   { icon: Home, label: 'ホーム', path: '/' },
+  { icon: BedDouble, label: 'ベッドマップ', path: '/bed-map' },
   { icon: Upload, label: '自動アサインシステム', path: '/auto-assign' },
   { icon: Sheet, label: 'スプレッドシート設定', path: '/sheet-settings' },
   { icon: Globe, label: 'World', path: '/world' },

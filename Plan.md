@@ -78,6 +78,13 @@ backend/
 ### 4.3 assignments（ベッド割り当て）
 - `reservation_id`, `bed_id`, `check_in_date`, `check_out_date`, `status`
 
+### 4.7 bed_timelines（ベッドタイムライン表示用ビュー/クエリ）
+- **カプセルホテル仕様対応**: 一部屋に一人の運用のため、ベッド単位でのタイムライン表示を標準とする
+- 各ベッドの予約状況を日付順に時系列表示
+- フロントエンドでは横軸：日付、縦軸：ベッド番号のマトリックス形式で可視化
+- データベースからは `assignments` テーブルを `bed_id`, `check_in_date` でソートして取得
+- ステータス別カラーリング（予約済、チェックイン済み、チェックアウト済み、清掃中、メンテナンス中）
+
 ### 4.4 cleaning_records（清掃記録）
 - `bed_id`, `status`, `staff_name`, `started_at`, `completed_at`, `notes`
 
